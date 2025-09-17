@@ -11,8 +11,19 @@ Run the latest XMRig in Docker with CUDA support on Ubuntu 24.04.
 So I made this.
 
 ### Usage
+
+#### Clone
+
 - Clone the repo
 - Run: `./xmrig-docker.sh <arguments>`
+
+#### Run directly
+
+Note: CUDA_VERSION=12.9.0 for prebuilt, for a different version / automatic detection use clone
+
+- Run: `docker run --rm -it --privileged --security-opt seccomp=unconfined --security-opt apparmor=unconfined --gpus all ghcr.io/badpirate/xmrig-docker:latest <arguments>`
+
+#### Arguments
 
 Arguments are passed directly to XMRig. If no arguments are provided, the default will be used:
 
@@ -23,6 +34,8 @@ Arguments are passed directly to XMRig. If no arguments are provided, the defaul
 Default splits any harvest between supportxmr and myself.
 
 ### Environment Values
+
+Set these values before building / running 
 
 - CUDA_VERSION: Specify a cuda version to use, if left blank will attempt auto-detect
 - XMRIG_VERSION: Specify XMRig version to use, default 6.24.0 (latest 9/2025)
