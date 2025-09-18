@@ -1,0 +1,24 @@
+services:
+  xmrig-gpu-cpu:
+    image: ghcr.io/badpirate/xmrig-docker:latest
+    command:
+          - "--donate-level"
+          - ${XMR_DONATE_LEVEL:-50}
+          - "-o"
+          - ${XMR_POOL:-pool.supportxmr.com:443}
+          - "-u"
+          - ${XMR_ADDRESS:-857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB}
+          - "-k"
+          - "--tls"
+          - "-p"
+          - ${XMR_POOL_NAME:-xmrig-cuda-docker}
+          - "--cuda"
+    privileged: true
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

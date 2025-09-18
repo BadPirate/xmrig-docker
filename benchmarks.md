@@ -1,0 +1,4 @@
+| Device              | Hashrate | Power Consumption | USD / day | Break Even electric cost |
+| ------------------- | -------- | ----------------- | --------- | ------------------------ |
+| RTX 5090 TUF        | 20 KH/s  | 200 W             | $0.56     | [0.11](https://www.coinwarz.com/mining/monero/calculator?h=20.00&p=200.00&pc=0.11&pf=0.00&d=643044861825.00000000&r=0.65000000&er=0.00272580&btcer=116820.89830000&ha=KH&hc=3995.00&hs=0&hq=1) |
+| AMD Ryzen 9 9950X3D | 5 KH/s   | 500 W             | $0.14 | [0.01](https://www.coinwarz.com/mining/monero/calculator?h=5.00&p=500.00&pc=0.01&pf=0.00&d=643044861825.00000000&r=0.65000000&er=0.00272580&btcer=116820.89830000&ha=KH&hc=3995.00&hs=0&hq=1) |

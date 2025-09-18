@@ -41,6 +41,10 @@ Set these values before building / running
 - XMRIG_VERSION: Specify XMRig version to use, default 6.24.0 (latest 9/2025)
 - XMRIG_CUDA_VERSION: Specify XMRig Cuda version to use, default 6.22.1 (latest 9/2025)
 
+### Worth it?
+
+Depends a lot on your hardware, home CPU mining ([at least for my napkin math and testing](benchmarks.md)) isn't profitable unless your electric rates are less than 0.11 kWH, and GPU mining isn't profitable unless your electricity is less than 0.01 kWH -- And that is assuming your equipment is free. That being said, mining does help improve transaction speeds as well as helps avoid the very real threat of 51% [takeover](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.coindesk.com/business/2025/08/12/monero-s-51-attack-problem-inside-qubic-s-controversial-network-takeover&ved=2ahUKEwjhxt6c-uKPAxUTEDQIHVmhDkYQFnoECBgQAQ&usg=AOvVaw0UtglHtaRMl2mPVeMjsnK3) plaguing the XMR coin at the moment. And the electricity isn't wasted if you are using it to heat your space :) 
+
 ### License
 
 This project is released under the Unlicense (public domain). See `LICENSE`.
