@@ -1,20 +1,83 @@
 services:
+  monerod:
+    image: ghcr.io/sethforprivacy/simple-monerod:latest
+    dns: 1.1.1.1
+    restart: unless-stopped
+    container_name: monerod
+    ports:
+      - 18080:18080
+      - 18084:18084
+      - 18089:18089
+    volumes:
+      - '/data/monerod:/home/monero/.bitmonero'
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:18089/get_info | grep -q '\"synchronized\": true'"]
+      interval: 30s
+      timeout: 5s
+      retries: 500
+      start_period: 60s
+    command: >-
+      --rpc-restricted-bind-ip=0.0.0.0 --rpc-restricted-bind-port=18089
+      --public-node --no-igd --enable-dns-blocklist --prune-blockchain
+      --zmq-pub=tcp://0.0.0.0:18084 --in-peers=50 --out-peers=50
+    
+  tor:
+    image: ghcr.io/sethforprivacy/tor:latest
+    container_name: tor
+    restart: unless-stopped
+    depends_on:
+      monerod:
+        condition: service_healthy
+      p2pool:
+        condition: service_started
+    links:
+      - monerod
+      - p2pool
+    environment:
+      MONEROD_TOR_SERVICE_HOSTS: 18089:monerod:18089
+      MONEROD_TOR_SERVICE_VERSION: '3'
+      P2POOL_TOR_SERVICE_HOSTS: 3333:p2pool:3333
+      P2POOL_TOR_SERVICE_VERSION: '3'
+    volumes:
+      - /data/tor:/var/lib/tor/hidden_service/
+  
+  p2pool:
+    image: ghcr.io/sethforprivacy/p2pool:latest
+    restart: unless-stopped
+    user: 1000:1000
+    container_name: p2pool
+    tty: true
+    dns: 1.1.1.1
+    stdin_open: true
+    depends_on:
+      monerod:
+        condition: service_healthy
+    volumes:
+      - /data/p2pool:/home/ubuntu/.p2pool/
+      - /dev/hugepages:/dev/hugepages:rw
+    ports:
+      - 3333:3333
+      - 37889:37889
+    command: >-
+      --wallet ${XMR_ADDRESS:-857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB}
+      --stratum "0.0.0.0:3333" --p2p "0.0.0.0:37889" --zmq-port "18084"
+      --loglevel "2" --addpeers "65.21.227.114:37889,node.sethforprivacy.com:37889"
+      --host "monerod" --rpc-port "18089"
   xmrig-gpu-cpu:
     image: ghcr.io/badpirate/xmrig-docker:latest
     command:
           - "--donate-level"
           - ${XMR_DONATE_LEVEL:-50}
           - "-o"
-          - ${XMR_POOL:-pool.supportxmr.com:443}
-          - "-u"
-          - ${XMR_ADDRESS:-857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB}
+          - p2pool:3333
           - "-k"
           - "--tls"
-          - "-p"
-          - ${XMR_POOL_NAME:-xmrig-cuda-docker}
           - "--cuda"
     privileged: true
     runtime: nvidia
+    depends_on:
+      p2pool:
+        condition: service_started
     deploy:
       resources:
         reservations:
