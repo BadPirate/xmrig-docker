@@ -12,9 +12,9 @@ So I made this.
 
 ### Usage
 
-#### Docker Compose (Monerod + P2Pool + XMRig)
+#### Docker Compose (Monerod + P2Pool + XMRig + Tor)
 
-This repo includes a full local stack using Monerod, P2Pool, and XMRig. The miner connects to P2Pool over the internal Docker network, and the wallet address is provided to P2Pool (not XMRig).
+This repo includes a full local stack using Monerod, P2Pool, Tor, and XMRig. The miner connects to P2Pool over the internal Docker network, and the wallet address is provided to P2Pool (not XMRig).
 
 Quick start:
 
@@ -57,7 +57,7 @@ Notes:
 - Clone the repo
 - Run: `./xmrig-docker.sh <arguments>`
 
-#### Run directly
+#### Docker
 
 Note: CUDA_VERSION=12.9.0 for prebuilt, for a different version / automatic detection use clone
 
@@ -69,12 +69,6 @@ Arguments are passed directly to XMRig. If no arguments are provided, the defaul
 
 ```bash
 --donate-level 50 --cuda -o pool.supportxmr.com:443 -u 857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB -k --tls -p xmrig-docker
-```
-
-To connect to a local P2Pool (outside of the compose stack), point `-o` to your P2Pool host:
-
-```bash
---donate-level 50 --cuda -o <p2pool-host>:3333 -k --tls
 ```
 
 Default splits any harvest between supportxmr and myself.
