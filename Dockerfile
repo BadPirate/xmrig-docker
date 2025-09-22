@@ -1,13 +1,13 @@
 ARG CUDA_VERSION=12.9.0
-FROM ubuntu:24.04 AS xmrig-downloader
+FROM alpine:latest AS xmrig-downloader
 
 ENV XMRIG_VERSION=6.24.0
 
-RUN apt-get update && apt-get install -y curl tar 
+RUN apk add --no-cache ca-certificates && update-ca-certificates
 
-RUN curl -L https://github.com/xmrig/xmrig/releases/download/v${XMRIG_VERSION}/xmrig-${XMRIG_VERSION}-noble-x64.tar.gz -o xmrig.tar.gz
-RUN tar -xzf xmrig.tar.gz
-RUN mv /xmrig-*/xmrig /xmrig
+RUN wget -q https://github.com/xmrig/xmrig/releases/download/v${XMRIG_VERSION}/xmrig-${XMRIG_VERSION}-noble-x64.tar.gz -O xmrig.tar.gz && \
+    tar -xzf xmrig.tar.gz && \
+    mv /xmrig-*/xmrig /xmrig
 
 FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu24.04 AS xmrig-cuda-builder
 ENV XMRIG_CUDA_VERSION=6.22.1
