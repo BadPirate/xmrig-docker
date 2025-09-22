@@ -56,7 +56,9 @@ well as a few bonus services together in a single stack.
 If left blank, will launch all services, otherwise specify services by name:
 
 - monerod: If you already have monerod sync'd somewhere (needed for p2pool) then you can leave this off service list
-  but you must set `MONEROD_HOST` `MONEROD_RPC_PORT` in .env
+  but you must set `MONEROD_HOST` `MONEROD_RPC_PORT` in .env, note if you haven't synchoronized monerod this can
+  take a long time (days), and the other dependent services will time out, you'll want to run `docker compose up monerod`
+  and wait for it to sync, before bringing up the larger service `docker compose up` everything.
 - tor: This will create tor services for your monerod RPC and your p2pool instance (in case you want to anonymously
   use them from elsewhere), the addresses will show at the end of `docker logs tor`, leaving this off if you want to
   use locally or don't need
