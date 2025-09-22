@@ -134,3 +134,50 @@ Depends a lot on your hardware, home CPU mining ([at least for my napkin math an
 ### License
 
 This project is released under the Unlicense (public domain). See `LICENSE`.
+
+### Huge pages helper script
+
+`hugepages.sh` helps you view, enable, and disable HugeTLB pages (1G or 2M) on the host. Huge pages can improve XMRig performance by reducing TLB misses.
+
+Prerequisites:
+
+- Run with sufficient privileges (use `sudo` for enable/disable)
+- Kernel support for the requested size (1G requires `pdpe1gb` CPU support and kernel config)
+- Optional: mount hugepages fs (most systems expose `/dev/hugepages` already)
+
+Quick usage:
+
+```bash
+# Show current huge pages and memory status
+./hugepages.sh status
+
+# Enable N pages, auto-select size (prefers 1G if supported)
+sudo ./hugepages.sh enable 2
+
+# Explicit sizes
+sudo ./hugepages.sh enable 4 -s 2M
+sudo ./hugepages.sh enable 1 -s 1G
+
+# Disable by size
+sudo ./hugepages.sh disable -s 2M
+sudo ./hugepages.sh disable -s 1G
+```
+
+Notes and troubleshooting:
+
+- 1G pages often need boot-time reservation. Example GRUB setting:
+  ```bash
+  GRUB_CMDLINE_LINUX="... default_hugepagesz=1G hugepagesz=1G hugepages=4"
+  ```
+  Then update GRUB and reboot.
+- 2M pages can usually be allocated at runtime, but fragmentation may prevent full allocation. Check kernel logs:
+  ```bash
+  dmesg | grep -i huge | tail -n 50
+  ```
+- If using containers, pass huge pages through to the container (example Compose volume):
+  ```yaml
+  volumes:
+    - /dev/hugepages:/dev/hugepages:rw
+  ```
+
+Manual: `./hugepages.sh --help`

@@ -36,4 +36,4 @@ COPY --from=xmrig-downloader /xmrig /usr/bin/xmrig
 RUN ln -sf /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1 /usr/lib/x86_64-linux-gnu/libnvidia-ml.so || true
 
 ENTRYPOINT ["xmrig"]
-CMD ["--donate-level", "50", "-o", "pool.supportxmr.com:443", "-u", "857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB", "-k", "--tls", "-p", "xmrig-cuda-docker", "--cuda"]
+CMD ["--donate-level", "50", "-o", "pool.supportxmr.com:443", "-u", "857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB", "-k", "--tls", "-p", "xmrig-cuda-docker", "--cuda", "--huge-pages"]
