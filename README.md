@@ -1,9 +1,19 @@
 ## XMRig Ubuntu 24.04 CUDA Docker
 
 ### Overview
-Run the latest XMRig in Docker with CUDA support on Ubuntu 24.04.
+
+Goal was to have something to make it easy to spin up a monero miner to help with takeovers, or mining for fun.
+
+Full stack XMRig (Monero Mining) for headless linux server with:
+
+- Support for CUDA / NVidia on latest cards (like Nvidia 5090)
+- Support to enable huge pages
+- Docker: for launching just XMRig and pointing at existing pool
+- Docker Compose: For launching full stack required for p2pool, monerod, p2pool, xmrig, tor (bonus so you can reach
+  monero wallet and p2pool anonymously over tor service)
 
 ### Why
+
 - [Metal3D XMRig Docker](https://github.com/metal3d/docker-xmrig): great project, but didn’t work for my RTX 5090 setup.
 - [XMRig CUDA Binary](https://xmrig.com/download/cuda): expects you to manually build the CUDA plugin; docs are sparse.
 - No easy way to live-switch to newer versions by bumping version numbers.
@@ -12,9 +22,47 @@ So I made this.
 
 ### Usage
 
-#### Docker Compose (Monerod + P2Pool + XMRig + Tor)
+1. Install docker
 
-This repo includes a full local stack using Monerod, P2Pool, Tor, and XMRig. The miner connects to P2Pool over the internal Docker network, and the wallet address is provided to P2Pool (not XMRig).
+#### Quick XMRig (Pre-built XMRig docker)
+
+Launch using pre-built docker image (Trusting aren't you?), note that this will help against qbit (probably) but
+contributes to whatever pool you choose instead (likely large).
+
+`docker run --rm -it --privileged --security-opt seccomp=unconfined --security-opt apparmor=unconfined --gpus all ghcr.io/badpirate/xmrig-docker:latest <arguments>`
+
+
+##### Arguments
+
+If arguments left blank, the defaults will use supportxmr pool, give 50% to that project, and give 50% to me, will
+enable cuda (wasteful compared to CPU mining, but if you just want to maximize hash rate) and huge pages. Setting any
+other arguments will clear the default values in favor of your own.
+
+`--donate-level 50 -o pool.supportxmr.com:443 -u 857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB -k --tl -p xmrig-cuda-docker --cuda --huge-pages`
+
+#### P2Pool docker compose full stack
+
+Best way to contribute to concensus without allowing takeovers is to use p2pool, this requires running your own
+monerod node, as well as p2pool endpoint that you point xmrig at. This docker compose flag puts all those services, as
+well as a few bonus services together in a single stack.
+
+1. Install docker compose if needed on host system
+2. Download this repo using git, and cd xmrig-docker
+3. Rename .env.EXAMPLE to .env and replace with your values
+4. `docker compose up <services> -d`
+
+##### Services
+
+If left blank, will launch all services, otherwise specify services by name:
+
+- monerod: If you already have monerod sync'd somewhere (needed for p2pool) then you can leave this off service list
+  but you must set `MONEROD_HOST` `MONEROD_RPC_PORT` in .env
+- tor: This will create tor services for your monerod RPC and your p2pool instance (in case you want to anonymously
+  use them from elsewhere), the addresses will show at the end of `docker logs tor`, leaving this off if you want to
+  use locally or don't need
+- p2pool: Required for the compose setup
+- xmrig: Required if you want to mine, doesn't take arguments as above, but instead uses the .env values and hard code
+  if you need custom arguments edit docker-compose to include those as well.
 
 Quick start:
 
@@ -73,18 +121,11 @@ Arguments are passed directly to XMRig. If no arguments are provided, the defaul
 
 Default splits any harvest between supportxmr and myself.
 
-### Environment Values
-
-Set these values before building / running 
+### Optional ENV Values
 
 - CUDA_VERSION: Specify a cuda version to use, if left blank will attempt auto-detect
 - XMRIG_VERSION: Specify XMRig version to use, default 6.24.0 (latest 9/2025)
 - XMRIG_CUDA_VERSION: Specify XMRig Cuda version to use, default 6.22.1 (latest 9/2025)
-
-Compose-specific:
-
-- XMR_ADDRESS: Wallet used by P2Pool in `docker-compose.example.yml`
-- XMR_DONATE_LEVEL: Optional override for XMRig donate level in compose
 
 ### Worth it?
 

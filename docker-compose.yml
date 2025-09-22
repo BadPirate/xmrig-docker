@@ -2,6 +2,7 @@ services:
   monerod:
     image: ghcr.io/sethforprivacy/simple-monerod:latest
     dns: 1.1.1.1
+    user: ${USER_ID:-0}:${GROUP_ID:-0}
     restart: unless-stopped
     container_name: monerod
     ports:
@@ -24,6 +25,7 @@ services:
   tor:
     image: ghcr.io/sethforprivacy/tor:latest
     container_name: tor
+    user: ${USER_ID:-0}:${GROUP_ID:-0}
     restart: unless-stopped
     depends_on:
       monerod:
@@ -39,13 +41,13 @@ services:
       P2POOL_TOR_SERVICE_HOSTS: 3333:p2pool:3333
       P2POOL_TOR_SERVICE_VERSION: '3'
     volumes:
-      - /data/tor:/var/lib/tor/hidden_service/
+      - tor_services:/var/lib/tor/hidden_service/
   
   p2pool:
     image: ghcr.io/sethforprivacy/p2pool:latest
     restart: unless-stopped
-    user: 1000:1000
     container_name: p2pool
+    user: ${USER_ID:-0}:${GROUP_ID:-0}
     tty: true
     dns: 1.1.1.1
     stdin_open: true
@@ -53,18 +55,27 @@ services:
       monerod:
         condition: service_healthy
     volumes:
-      - /data/p2pool:/home/ubuntu/.p2pool/
+      - p2pool:/home/ubuntu/.p2pool/
       - /dev/hugepages:/dev/hugepages:rw
     ports:
       - 3333:3333
       - 37889:37889
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q ':0D05' /proc/net/tcp /proc/net/tcp6 2>/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 100
     command: >-
       --wallet ${XMR_ADDRESS:-857wrDAs1cf2K6iekP3JuWeCAzCLbC8U6DJE7osGhZ8UVBqzCNa6Cu9iiNsH4MaUvje56yaT851rihEWvGuvcpqrGoXhRQB}
       --stratum "0.0.0.0:3333" --p2p "0.0.0.0:37889" --zmq-port "18084"
       --loglevel "2" --addpeers "65.21.227.114:37889,node.sethforprivacy.com:37889"
-      --host "monerod" --rpc-port "18089"
-  xmrig-gpu-cpu:
-    image: ghcr.io/badpirate/xmrig-docker:latest
+      --host ${MONEROD_HOST:-monerod} --rpc-port "${MONEROD_RPC_PORT:-18089}"
+
+  xmrig:
+    build:
+      context: .
+    user: ${USER_ID:-0}:${GROUP_ID:-0}
+    container_name: xmrig
     command:
           - "--donate-level"
           - ${XMR_DONATE_LEVEL:-50}
@@ -77,7 +88,7 @@ services:
     runtime: nvidia
     depends_on:
       p2pool:
-        condition: service_started
+        condition: service_healthy
     deploy:
       resources:
         reservations:
@@ -85,3 +96,6 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+volumes:
+  p2pool:
+  tor_services:
