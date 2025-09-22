@@ -10,7 +10,7 @@ services:
       - 18084:18084
       - 18089:18089
     volumes:
-      - '/data/monerod:/home/monero/.bitmonero'
+      - '${DATA_DIR:-./data}/monerod:/home/monero/.bitmonero'
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:18089/get_info | grep -q '\"synchronized\": true'"]
       interval: 30s
@@ -41,7 +41,7 @@ services:
       P2POOL_TOR_SERVICE_HOSTS: 3333:p2pool:3333
       P2POOL_TOR_SERVICE_VERSION: '3'
     volumes:
-      - tor_services:/var/lib/tor/hidden_service/
+      - ${DATA_DIR:-./data}/tor_services:/var/lib/tor/hidden_service/
   
   p2pool:
     image: ghcr.io/sethforprivacy/p2pool:latest
@@ -55,7 +55,6 @@ services:
       monerod:
         condition: service_healthy
     volumes:
-      - p2pool:/home/ubuntu/.p2pool/
       - /dev/hugepages:/dev/hugepages:rw
     ports:
       - 3333:3333
@@ -96,6 +95,3 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-volumes:
-  p2pool:
-  tor_services:
